@@ -8,6 +8,7 @@ from asgiref.sync import sync_to_async
 # @sync_to_async
 
 def Dashboard(request):
+    print('...')
     return JsonResponse({
         "Current": 20,"Power":27,"Temperature":30,"Humidity":20,"Cycle":"ON","Door":"CLOSED",
         "Start":"00:00:33","Cycle_Time":"00:00:00","Input_Load":41.8,"Actual_Weight":3.4,
