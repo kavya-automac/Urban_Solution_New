@@ -1,7 +1,13 @@
 from rest_framework.decorators import api_view
-from django.http import JsonResponse
+from django.http import JsonResponse, request
 from asgiref.sync import sync_to_async
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import api_view
+from rest_framework import status
 # Create your views here.
 
 @api_view(['GET'])
@@ -48,3 +54,25 @@ def Dashboard(request):
                         }
     }
     )
+
+
+
+
+
+class Home(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+@api_view(('POST',))
+def logout_view(request):
+    """Blacklist the refresh token: extract token from the header
+      during logout request user and refresh token is provided"""
+    print("-------logout")
+    Rtoken = request.data["refresh_token"]
+    token = RefreshToken(Rtoken)
+    token.blacklist()
+    return JsonResponse({"status":"Successful Logout"} ,status=status.HTTP_200_OK)
