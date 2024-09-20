@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-d!gkjls(*)39l0)i59lm4^#ve@nsv-c($4x-l=!n=i@#l%dv(#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.29.144','127.0.0.1']
+ALLOWED_HOSTS = ['192.168.29.144','127.0.0.1','43.205.60.235']
 
 
 # Application definition
@@ -128,12 +128,12 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#
-# CHANNEL_LAYERS={
-#     "default":{
-#         'BACKEND':"channels_redis.core.RedisChannelLayer",
-#         "CONFIG":{
-#             "hosts":['redis://13.200.249.117'],
-#         }
-#     }
-# }
+
+CHANNEL_LAYERS={
+    "default":{
+        'BACKEND':"channels_redis.core.RedisChannelLayer",
+        "CONFIG":{
+            "hosts":['redis://43.205.60.235'],
+        }
+    }
+}
