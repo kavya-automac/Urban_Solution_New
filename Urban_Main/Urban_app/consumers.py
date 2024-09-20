@@ -8,7 +8,6 @@ channel_layer = get_channel_layer()
 
 print('channel_layer',channel_layer)
 
-from .views import Dashboard
 
 class DashboardSocket(AsyncWebsocketConsumer):
     async def connect(self):
@@ -16,6 +15,8 @@ class DashboardSocket(AsyncWebsocketConsumer):
 
         await self.channel_layer.group_add("singlemachine", self.channel_name)
         await self.accept()
+        from .views import Dashboard
+
         try:
 
             dashboard_api_fun = await Dashboard()
