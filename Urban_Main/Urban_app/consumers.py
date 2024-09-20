@@ -12,44 +12,47 @@ from .views import Dashboard
 
 class DashboardSocket(AsyncWebsocketConsumer):
     async def connect(self):
-        print('.......connected')
+        print('.......connected', self.channel_name)
 
-        await self.channel_layer.group_add('str(machine_id)'+'_io', self.channel_name)
-
+        await self.channel_layer.group_add("singlemachine", self.channel_name)
         await self.accept()
-
-
         try:
 
             dashboard_api_fun = await Dashboard()
-            dashboard_api_fun_json = json.dumps({"dashboard_data":dashboard_api_fun})
+            # print('dashboard_api_fun',dashboard_api_fun)
+            # dashboard_api_fun_data = dashboard_api_fun.content.decode('utf-8')  # Decode byte content to string
+
+            # dashboard_data = dashboard_api_fun.json()
+            # print('dashboard_data',dashboard_data)
+
+            dashboard_api_fun_json = json.dumps(dashboard_api_fun)
 
             channel_layer = get_channel_layer()
-            await channel_layer.group_send('str(machine_id)'+'_io',
-                                           {"type": "dashboard_socket_data", "text": dashboard_api_fun_json})
+            await channel_layer.group_send('singlemachine',
+                                           {"type": "dashboardsocketdata", "text": dashboard_api_fun_json})
         except Exception as e:
             status = json.dumps({"status": e})
 
             channel_layer = get_channel_layer()
-            await channel_layer.group_send('str(machine_id)'+'_io',
-                                           {"type": "dashboard_socket_data", "text": status})
+            await channel_layer.group_send('singlemachine',
+                                           {"type": "dashboardsocketdata", "text": status})
 
 
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard('str(machine_id)'+'_io', self.channel_name)
+        await self.channel_layer.group_discard('singlemachine', self.channel_name)
 
     async def receive(self, text_data):
 
-        await self.channel_layer.group_send('str(machine_id)'+'_io', {
-            "type": "dashboard_socket_data",
+        await self.channel_layer.group_send('singlemachine', {
+            "type": "dashboardsocketdata",
             "text": text_data  # Send the processed data as the message
         })
 
-    async def dashboard_socket_data(self, event):
+    async def dashboardsocketdata(self, event):
 
         try:
             await self.send(text_data=event["text"])
 
         except Exception as e:
-            print("chat message error - ", e)
+            print("dashboardsocketdata error - ", e)
