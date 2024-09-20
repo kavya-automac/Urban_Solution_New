@@ -41,17 +41,30 @@ INSTALLED_APPS = [
     'rest_framework',
     'Urban_app',
     'channels',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+
+    'http://localhost:3000',
+    'http://192.168.29.74:3000',
+    'http://43.205.60.235:8000',
+
+    ]
+
+CORS_ALLOW_CREDENTIALS=True
+
 
 ROOT_URLCONF = 'Urban_Main.urls'
 
@@ -79,12 +92,26 @@ ASGI_APPLICATION = 'Urban_Main.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+     'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD':'Automac150221',
+        'HOST':'urbansolutionsdb.cr6a6kkgegom.ap-south-1.rds.amazonaws.com',
+        'PORT':'5432',
     }
 }
+
 
 
 # Password validation
