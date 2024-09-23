@@ -1,6 +1,7 @@
 import datetime
 import json
 
+from django.db.models import Sum
 from rest_framework import status
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
@@ -59,27 +60,62 @@ def Dashboard():
 def Reports(request):
     start_datetime = request.data.get('start_datetime')
     end_datetime = request.data.get('end_datetime')
+    report_type_f = request.data.get("Report_type")
     try:
         start_datetime = datetime.datetime.strptime(start_datetime, '%Y-%m-%d')
-        print('try  start_datetime',start_datetime)
+        # print('try  start_datetime',start_datetime)
 
         # end_datetime = datetime.datetime.strptime(end_datetime, '%Y-%m-%d %H:%M:%S')
         end_datetime_strp = datetime.datetime.strptime(end_datetime, '%Y-%m-%d')
         end_datetime = end_datetime_strp + datetime.timedelta(days=1)
-        print('after increment end_datetime',end_datetime)
-        query_data = Reports_data.objects.filter(Timestamp__range=[start_datetime, end_datetime])
-        print("query_data",query_data)
-        query_serializer =ReportsSerializer(query_data,many=True)
-        print("query_serializer", query_serializer.data)
-
-
-
-
-        reports_res ={
+        # print('after increment end_datetime',end_datetime)
+        if report_type_f == "Compost_Report":
+            query_data = Reports_data.objects.filter(Timestamp__range=[start_datetime, end_datetime])
+            # print("query_data",query_data)
+            query_serializer =ReportsSerializer(query_data,many=True)
+            # print("query_serializer", query_serializer.data)
+            reports_res = {
                 "From_timestamp": start_datetime,
                 "To_timestamp": end_datetime_strp,
                 "Report_data": query_serializer.data
             }
+        elif  report_type_f == "Cummulative_Report":
+            query_data = Cummulative_report_data.objects.filter(date_data__range=[start_datetime, end_datetime])
+            print("query_data", query_data)
+            query_serializer = CummulativeSerializer(query_data, many=True)
+
+            aggregated_data = query_data.aggregate(
+                total_waste_add=Sum('waste_add'),
+                total_power_consumption=Sum('power_consumed'),
+                total_compost_removed=Sum('compost_removed')
+            )
+            # print("aggregated_data",aggregated_data)
+
+            # Format the result as a dictionary
+            total_res = {
+                "total_waste_add": aggregated_data['total_waste_add'] or 0,
+                "total_power_consumption": aggregated_data['total_power_consumption'] or 0,
+                "total_compost_removed": aggregated_data['total_compost_removed'] or 0
+            }
+
+            # Output the total response
+            # print(total_res)
+            reports_res = {
+                "From_timestamp": start_datetime,
+                "To_timestamp": end_datetime_strp,
+                "Report_data": query_serializer.data,
+                "Total_res": total_res
+            }
+
+
+
+            # print("query_serializer", query_serializer.data)
+
+
+        else:
+            return JsonResponse({"error":"enter valid report type "})
+
+
 
 
     except:
