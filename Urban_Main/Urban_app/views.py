@@ -1,6 +1,7 @@
 import datetime
 import json
 
+from django.db.models import Sum
 from rest_framework import status
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
@@ -73,19 +74,48 @@ def Reports(request):
             # print("query_data",query_data)
             query_serializer =ReportsSerializer(query_data,many=True)
             # print("query_serializer", query_serializer.data)
-        elif  report_type_f == "Cummulative_Report":
-            query_data = Cummulative_report_data.objects.filter(date_data__range=[start_datetime, end_datetime])
-            # print("query_data", query_data)
-            query_serializer = CummulativeSerializer(query_data, many=True)
-            # print("query_serializer", query_serializer.data)
-        else:
-            return JsonResponse({"error":"enter valid report type "})
-
-        reports_res ={
+            reports_res = {
                 "From_timestamp": start_datetime,
                 "To_timestamp": end_datetime_strp,
                 "Report_data": query_serializer.data
             }
+        elif  report_type_f == "Cummulative_Report":
+            query_data = Cummulative_report_data.objects.filter(date_data__range=[start_datetime, end_datetime])
+            print("query_data", query_data)
+            query_serializer = CummulativeSerializer(query_data, many=True)
+
+            aggregated_data = query_data.aggregate(
+                total_waste_add=Sum('waste_add'),
+                total_power_consumption=Sum('power_consumed'),
+                total_compost_removed=Sum('compost_removed')
+            )
+            # print("aggregated_data",aggregated_data)
+
+            # Format the result as a dictionary
+            total_res = {
+                "total_waste_add": aggregated_data['total_waste_add'] or 0,
+                "total_power_consumption": aggregated_data['total_power_consumption'] or 0,
+                "total_compost_removed": aggregated_data['total_compost_removed'] or 0
+            }
+
+            # Output the total response
+            # print(total_res)
+            reports_res = {
+                "From_timestamp": start_datetime,
+                "To_timestamp": end_datetime_strp,
+                "Report_data": query_serializer.data,
+                "Total_res": total_res
+            }
+
+
+
+            # print("query_serializer", query_serializer.data)
+
+
+        else:
+            return JsonResponse({"error":"enter valid report type "})
+
+
 
 
     except:
