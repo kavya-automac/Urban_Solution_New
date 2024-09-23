@@ -59,21 +59,27 @@ def Dashboard():
 def Reports(request):
     start_datetime = request.data.get('start_datetime')
     end_datetime = request.data.get('end_datetime')
+    report_type_f = request.data.get("Report_type")
     try:
         start_datetime = datetime.datetime.strptime(start_datetime, '%Y-%m-%d')
-        print('try  start_datetime',start_datetime)
+        # print('try  start_datetime',start_datetime)
 
         # end_datetime = datetime.datetime.strptime(end_datetime, '%Y-%m-%d %H:%M:%S')
         end_datetime_strp = datetime.datetime.strptime(end_datetime, '%Y-%m-%d')
         end_datetime = end_datetime_strp + datetime.timedelta(days=1)
-        print('after increment end_datetime',end_datetime)
-        query_data = Reports_data.objects.filter(Timestamp__range=[start_datetime, end_datetime])
-        print("query_data",query_data)
-        query_serializer =ReportsSerializer(query_data,many=True)
-        print("query_serializer", query_serializer.data)
-
-
-
+        # print('after increment end_datetime',end_datetime)
+        if report_type_f == "Compost_Report":
+            query_data = Reports_data.objects.filter(Timestamp__range=[start_datetime, end_datetime])
+            # print("query_data",query_data)
+            query_serializer =ReportsSerializer(query_data,many=True)
+            # print("query_serializer", query_serializer.data)
+        elif  report_type_f == "Cummulative_Report":
+            query_data = Cummulative_report_data.objects.filter(date_data__range=[start_datetime, end_datetime])
+            # print("query_data", query_data)
+            query_serializer = CummulativeSerializer(query_data, many=True)
+            # print("query_serializer", query_serializer.data)
+        else:
+            return JsonResponse({"error":"enter valid report type "})
 
         reports_res ={
                 "From_timestamp": start_datetime,
